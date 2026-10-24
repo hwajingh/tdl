@@ -1,5 +1,3 @@
-// import logo from "./logo.svg";
-// import "./App.css";
 import React, { Component } from "react";
 
 class App extends Component {
@@ -16,29 +14,33 @@ class App extends Component {
       [key]: value,
     });
   }
+
+  makeId() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random()}`;
+  }
   addItem() {
-    //create item with unique id
+    // FIX: previously `1 + Math.random()` could collide, breaking React
+    // keys and deleting the wrong row. Also previously blank strings
+    // were accepted, and setState read this.state directly.
+    if (this.state.newItem.trim() === "") {
+      return;
+    }
     const newItem = {
-      id: 1 + Math.random(),
+      id: this.makeId(),
       value: this.state.newItem.slice(),
     };
-
-    const list = [...this.state.list];
-
-    list.push(newItem);
-
-    // update state with new list and reset new item input
-    this.setState({
-      list,
+    this.setState((prevState) => ({
+      list: [...prevState.list, newItem],
       newItem: "",
-    });
+    }));
   }
   deleteItem(id) {
-    const list = [...this.state.list];
-
-    const updatedList = list.filter((item) => item.id !== id);
-
-    this.setState({ list: updatedList });
+    this.setState((prevState) => ({
+      list: prevState.list.filter((item) => item.id !== id),
+    }));
   }
   render() {
     return (
@@ -73,22 +75,3 @@ class App extends Component {
 }
 export default App;
 
-// function App() {
-//   constructor(props){
-//     super(props);
-
-//     this.state={
-//       newItem:"",
-//       list:[]
-//     }
-//   }
-//   // render(){
-//       return (
-//       <div className="App">
-
-//       </div>
-//     );
-//   // }
-// }
-
-// export default App;
